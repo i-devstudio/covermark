@@ -161,7 +161,6 @@ async function sendGift() {
                     "type": "flex",
                     "altText": `คุณได้รับของขวัญจากคุณ ${sender}`,
                     "contents": {
-        
 							"type": "bubble",
 							"body": {
 							  "type": "box",
@@ -173,7 +172,7 @@ async function sendGift() {
 								  "contents": [
 									{
 									  "type": "image",
-									  "url": "https://i.pinimg.com/1200x/34/fa/9f/34fa9f65309de40a66da3808161d7310.jpg",
+									  "url": "https://img5.pic.in.th/file/secure-sv1/COVERMARK.jpg",
 									  "size": "full",
 									  "aspectRatio": "3:4",
 									  "aspectMode": "cover"
@@ -211,7 +210,7 @@ async function sendGift() {
 										},
 										{
 										  "type": "text",
-										  "text": currentMsg,
+										  "text": window.selectedMessage,
 										  "weight": "regular",
 										  "color": "#ffffff",
 										  "align": "center"
