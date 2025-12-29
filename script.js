@@ -243,60 +243,32 @@ async function sendGift() {
     }
 }
 
-async function initializeLiff() {
-    try {
-        await liff.init({ liffId: "2008756827-zANFfOMQ" });
+function startShakeProcess(img, msg, sender, receiver) {
+    // 1. เปิดหน้า Section 5
+    const sec5 = document.getElementById('section-5');
+    sec5.style.display = 'block';
 
-        // ตรวจสอบพารามิเตอร์ใน URL
-        const urlParams = new URLSearchParams(window.location.search);
-        
-        if (urlParams.get('openGift') === 'true') {
-            // ดึงข้อมูลทั้งหมดที่ส่งมากับ URL
-            const giftImg = urlParams.get('img');
-            const giftMsg = urlParams.get('msg');
-            const senderName = urlParams.get('from') || "เพื่อนของคุณ";
-            const receiverName = urlParams.get('receiver') || "คุณ";
+    // 2. ใส่ข้อมูลพื้นฐาน (ป้องกัน Error ด้วยการเช็ค Element ก่อน)
+    if(document.getElementById('view-receiver')) document.getElementById('view-receiver').innerText = `ถึง คุณ${receiver}`;
+    if(document.getElementById('view-sender')) document.getElementById('view-sender').innerText = sender;
+    if(document.getElementById('final-receiver')) document.getElementById('final-receiver').innerText = `คุณ${receiver}`;
+    if(document.getElementById('final-message')) document.getElementById('final-message').innerText = `"${msg}"`;
+    if(document.getElementById('result-product-img')) document.getElementById('result-product-img').src = img;
 
-            // สั่งเริ่มกระบวนการหน้าเขย่าทันที
-            startShakeProcess(giftImg, giftMsg, senderName, receiverName);
-        }
-    } catch (error) {
-        console.error("LIFF Init Error", error);
-    }
+    // 3. เริ่มตรวจจับเขย่า
+    initShakeDetection();
 }
 
-function startShakeProcess(img, msg, sender, receiver) {
-    console.log("Debug: startShakeProcess Initialized");
-	alert("section 5 coming soon");
-    // 1. ซ่อนทุก Section อื่นๆ ก่อน
-    const sections = document.querySelectorAll('section');
-    sections.forEach(s => s.style.display = 'none');
+function revealGift() {
+    // เล่นเสียง Jazz (ถ้ามีไฟล์)
+    // var audio = new Audio('path_to_jazz_sound.mp3'); audio.play();
 
-    // 2. ดึง Section 5 ออกมา
-    const section5 = document.getElementById('section-5');
-    if (!section5) {
-        console.error("Error: ไม่พบ id 'section-5' ใน HTML");
-        return;
+    // สลับหน้าจอภายใน Section 5
+    document.getElementById('shake-view').style.display = 'none';
+    document.getElementById('gift-result-view').style.display = 'block';
+    
+    // พลุ
+    if (typeof confetti === 'function') {
+        confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
     }
-
-    // 3. บังคับแสดงผล และตรวจสอบความสูง
-    section5.style.display = 'block';
-    section5.style.minHeight = '100vh';
-    section5.style.visibility = 'visible';
-    section5.style.opacity = '1';
-
-    // 4. ใส่ข้อมูล (ใส่ Try-Catch เพื่อไม่ให้ Error หนึ่งจุดทำให้หน้าขาวทั้งหมด)
-    try {
-        if(receiver) document.getElementById('display-receiver').innerText = `ถึง คุณ${receiver}`;
-        if(sender) document.getElementById('display-sender-info').innerHTML = `<b>${sender}</b> ได้เลือกของขวัญพิเศษไว้<br>สำหรับคุณโดยเฉพาะ`;
-        if(img) document.getElementById('result-product-img').src = img;
-        if(msg) document.getElementById('final-message').innerText = msg;
-        
-        console.log("Debug: Data injection success");
-    } catch (e) {
-        console.warn("Data injection warning:", e);
-    }
-
-    // 5. รันระบบเขย่า
-    initShakeDetection();
 }
