@@ -28,8 +28,8 @@ async function initializeLiff() {
             const giftMsg = urlParams.get('msg');
             
             // เรียกฟังก์ชันแสดงหน้าเปิดของขวัญ (ต้องมีฟังก์ชัน showShakePage รองรับ)
-            if (typeof showShakePage === "function") {
-                showShakePage(giftImg, giftMsg);
+            if (typeof startShakeProcess === "function") {
+                startShakeProcess(giftImg, giftMsg);
             }
         }
 
@@ -39,7 +39,8 @@ async function initializeLiff() {
 }
 
 // เรียกใช้งานทันทีเมื่อโหลดหน้าเว็บ
-initializeLiff();
+// initializeLiff();
+
 // --------------------------------
 
 
@@ -244,6 +245,8 @@ async function sendGift() {
 }
 
 function startShakeProcess(img, msg, sender, receiver) {
+
+	document.querySelectorAll('section').forEach(s => s.style.display = 'none');
     // 1. เปิดหน้า Section 5
     const sec5 = document.getElementById('section-5');
     sec5.style.display = 'block';
@@ -272,3 +275,7 @@ function revealGift() {
         confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
     }
 }
+
+window.onload = function() {
+    initializeLiff();
+};
