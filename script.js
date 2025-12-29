@@ -140,103 +140,61 @@ function summarizeData() {
 }
 
 async function sendGift() {
-    // ตรวจสอบการ Login ก่อนเสมอ
+    // 1. ตรวจสอบว่าเปิดผ่าน LIFF หรือไม่
     if (!liff.isLoggedIn()) {
         liff.login();
         return;
     }
 
+    // 2. ดึงค่าที่ User เลือกไว้
     const receiver = document.getElementById('receiver-name').value;
     const sender = document.getElementById('sender-name').value;
+    
+    // สร้าง Link สำหรับผู้รับ (ใส่ข้อมูลไปกับ URL เพื่อให้หน้าเปิดของขวัญแสดงผลถูก)
+    const shareUrl = `https://liff.line.me/2008756827-zANFfOMQ?openGift=true&img=${encodeURIComponent(window.selectedProductImg)}&msg=${encodeURIComponent(window.selectedMessage)}`;
 
-    if (!receiver || !sender) {
-        alert("กรุณากรอกชื่อผู้รับและผู้ส่งให้ครบถ้วน");
-        return;
-    }
-
-    // --- แก้ไขจุดนี้: ประกาศตัวแปรที่ขาดไป ---
-    const bgImage = "https://i.pinimg.com/1200x/34/fa/9f/34fa9f65309de40a66da3808161d7310.jpg";
-    const currentImg = window.selectedProductImg || document.querySelector('.product-swiper .swiper-slide-active img').src;
-    const currentMsg = window.selectedMessage || document.querySelector('.message-swiper .swiper-slide-active').innerText.trim();
-
-    // สร้างลิงก์สำหรับการเปิดของขวัญ
-    const shareUrl = `https://liff.line.me/2008756827-zANFfOMQ?openGift=true&img=${encodeURIComponent(currentImg)}&msg=${encodeURIComponent(currentMsg)}&from=${encodeURIComponent(sender)}`;
-
+    // 3. ตรวจสอบ Permission การแชร์
     if (liff.isApiAvailable('shareTargetPicker')) {
         try {
-            // เรียกใช้ Share Target Picker พร้อมโครงสร้างที่ถูกต้อง
             const result = await liff.shareTargetPicker([
                 {
                     "type": "flex",
-                    "altText": `คุณได้รับของขวัญจาก ${sender}`,
+                    "altText": `คุณได้รับของขวัญจากคุณ ${sender}`,
                     "contents": {
                         "type": "bubble",
+                        "hero": {
+                            "type": "image",
+                            "url": window.selectedProductImg,
+                            "size": "full",
+                            "aspectRatio": "20:13",
+                            "aspectMode": "cover"
+                        },
                         "body": {
                             "type": "box",
                             "layout": "vertical",
                             "contents": [
+                                { "type": "text", "text": "Surprise! 🎁", "weight": "bold", "color": "#b89a5b", "size": "sm" },
+                                { "type": "text", "text": `ถึง: ${receiver}`, "weight": "bold", "size": "xl", "margin": "md" },
+                                { "type": "text", "text": window.selectedMessage, "wrap": true, "color": "#666666", "margin": "md" },
+                                { "type": "separator", "margin": "lg" },
+                                { "type": "text", "text": `จาก: ${sender}`, "size": "xs", "color": "#999999", "margin": "md" }
+                            ]
+                        },
+                        "footer": {
+                            "type": "box",
+                            "layout": "vertical",
+                            "contents": [
                                 {
-                                    "type": "box",
-                                    "layout": "vertical",
-                                    "contents": [
-                                        {
-                                            "type": "image",
-                                            "url": bgImage, // ใช้ตัวแปรที่ประกาศไว้ข้างต้น
-                                            "size": "full",
-                                            "aspectRatio": "3:4",
-                                            "aspectMode": "cover"
-                                        },
-                                        {
-                                            "type": "box",
-                                            "layout": "vertical",
-                                            "contents": [
-                                                { "type": "text", "text": "COVERMARK", "weight": "bold", "color": "#ffffff", "align": "center" }
-                                            ],
-                                            "position": "absolute",
-                                            "offsetTop": "20px",
-                                            "offsetStart": "0px",
-                                            "offsetEnd": "0px"
-                                        },
-                                        {
-                                            "type": "box",
-                                            "layout": "vertical",
-                                            "contents": [
-                                                { "type": "text", "text": `To: ${receiver}`, "weight": "bold", "color": "#ffffff", "align": "center", "size": "lg" },
-                                                { "type": "text", "text": currentMsg, "color": "#ffffff", "align": "center", "wrap": true }
-                                            ],
-                                            "position": "absolute",
-                                            "offsetStart": "0px",
-                                            "offsetEnd": "0px",
-                                            "offsetBottom": "80px"
-                                        },
-                                        {
-                                            "type": "box",
-                                            "layout": "vertical",
-                                            "contents": [
-                                                {
-                                                    "type": "button",
-                                                    "action": {
-                                                        "type": "uri",
-                                                        "label": "เปิดกล่องของขวัญ",
-                                                        "uri": shareUrl
-                                                    },
-                                                    "style": "primary",
-                                                    "height": "sm",
-                                                    "color": "#e63946",
-                                                    "width": "60%"
-                                                }
-                                            ],
-                                            "position": "absolute",
-                                            "offsetStart": "0px",
-                                            "offsetEnd": "0px",
-                                            "offsetBottom": "20px",
-                                            "alignItems": "center"
-                                        }
-                                    ],
-                                    "position": "relative"
+                                    "type": "button",
+                                    "action": {
+                                        "type": "uri",
+                                        "label": "เปิดดูของขวัญ",
+                                        "uri": shareUrl
+                                    },
+                                    "style": "primary",
+                                    "color": "#b89a5b"
                                 }
-                            ],
-                            "paddingAll": "0px"
+                            ]
                         }
                     }
                 }
@@ -244,14 +202,16 @@ async function sendGift() {
 
             if (result) {
                 alert("ส่งของขวัญเรียบร้อยแล้ว!");
-                liff.closeWindow(); 
+                liff.closeWindow(); // ปิดหน้าต่าง LIFF ทันทีหลังส่งเสร็จ
+            } else {
+                console.log("User cancelled the picker");
             }
         } catch (error) {
-            console.error("Error Detail:", error);
-            alert("ส่งไม่สำเร็จเนื่องจาก: " + error.message);
+            console.error("Error sending message:", error);
+            alert("เกิดข้อผิดพลาดในการส่ง กรุณาลองใหม่");
         }
     } else {
-        alert("กรุณาเปิดลิงก์นี้ในแอป LINE เพื่อส่งของขวัญ");
+        alert("ฟีเจอร์นี้ไม่รองรับบนเบราว์เซอร์ภายนอก กรุณาเปิดใน LINE");
     }
 }
 
