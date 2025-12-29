@@ -183,26 +183,6 @@ async function sendGift() {
 									  "contents": [
 										{
 										  "type": "text",
-										  "text": "COVERMARK",
-										  "weight": "bold",
-										  "color": "#ffffff",
-										  "align": "center"
-										}
-									  ],
-									  "height": "40px",
-									  "justifyContent": "center",
-									  "alignItems": "center",
-									  "position": "absolute",
-									  "offsetTop": "10px",
-									  "offsetStart": "50px",
-									  "offsetEnd": "50px"
-									},
-									{
-									  "type": "box",
-									  "layout": "vertical",
-									  "contents": [
-										{
-										  "type": "text",
 										  "text": `To: ${receiver}`,
 										  "weight": "bold",
 										  "color": "#ffffff",
