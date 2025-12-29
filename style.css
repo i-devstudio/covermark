@@ -1,0 +1,126 @@
+* { box-sizing: border-box; }
+body { margin: 0; font-family: sans-serif; overflow-x: hidden; }
+
+section {
+    display: none;
+    height: 100vh;
+    width: 100vw;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 20px;
+}
+
+section.active { display: flex; }
+
+/* Section 1 BG */
+#section-1 {
+    background: url('https://covermark.co.th/wp-content/uploads/2021/08/covermark-banner.jpg') center/cover;
+}
+
+.swiper { width: 100%; max-width: 300px; height: 250px; margin: 20px 0; }
+.message-swiper { height: 50px; }
+
+.swiper-slide {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0.4;
+    transition: 0.3s;
+}
+
+.swiper-slide-active { opacity: 1; transform: scale(1.1); }
+
+img { max-width: 100%; border-radius: 10px; }
+
+input {
+    display: block; width: 80%; margin: 10px auto; padding: 10px;
+}
+
+button {
+    padding: 10px 30px; 
+	background: #b89a5b; 
+	color: #fff; 
+	border:none; 
+	cursor: pointer; 
+	margin-top: 10px;
+}
+
+/* ทำให้ภาพที่ไม่เลือกจางลง และภาพที่เลือกเด่นขึ้น */
+.product-swiper .swiper-slide {
+    width: 200px; /* กำหนดขนาดแน่นอน */
+    transition: transform 0.3s, opacity 0.3s;
+    opacity: 0.3;
+}
+
+.product-swiper .swiper-slide-active {
+    opacity: 1;
+    transform: scale(1.2); /* ขยายภาพที่เลือก */
+}
+
+/* ตกแต่ง Message Slide ให้รู้ว่าเลื่อนได้ */
+.message-swiper .swiper-slide {
+    font-size: 1.2rem;
+    color: #555;
+    font-weight: bold;
+}
+
+/* การจัดการ Section */
+section {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.4s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: white;
+    z-index: 1;
+}
+
+section.active {
+    opacity: 1;
+    visibility: visible;
+    z-index: 10;
+}
+
+/* ปรับแต่ง Swiper สินค้า */
+.product-swiper {
+    width: 100%;
+    padding: 50px 0; /* เผื่อพื้นที่ให้ภาพขยาย */
+}
+
+.product-swiper .swiper-slide {
+    width: 250px; /* กำหนดความกว้างภาพ */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transition: transform 0.3s;
+    opacity: 0.4;
+}
+
+.product-swiper .swiper-slide-active {
+    opacity: 1;
+    transform: scale(1.2);
+}
+
+.product-swiper img {
+    width: 100%;
+    border-radius: 15px;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+}
+
+/* Message Swiper */
+.message-swiper {
+    width: 80%;
+    height: 60px;
+    margin: 20px 0;
+    background: #fdf5e6;
+    border-radius: 30px;
+}

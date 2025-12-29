@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CoverMark Gift Sharing</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <section id="section-1" class="active">
+        <div class="bg-overlay"></div>
+        <div class="content">
+            <h1>CoverMark Gift</h1>
+            <button onclick="goToSection(2)">เริ่มเลย</button>
+        </div>
+    </section>
+
+    <section id="section-2">
+        <div class="content">
+            <h2>เงื่อนไขการใช้งาน</h2>
+            <p>กติกาสั้นๆ: ข้อมูลที่คุณกรอกจะใช้เพื่อการส่งของขวัญผ่าน LINE เท่านั้น</p>
+            <button onclick="goToSection(3)">ยอมรับ</button>
+        </div>
+    </section>
+
+    <section id="section-3">
+		<!-- <audio id="bg-music" loop src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"></audio> -->
+		
+		<h3>เลือกของขวัญ</h3>
+		
+		<div class="swiper product-swiper">
+			<div class="swiper-wrapper">
+				<div class="swiper-slide" data-name="CoverMark Foundation 01">
+					<img src="https://i.pinimg.com/1200x/ff/42/8a/ff428ab847bc83aea15469ba06ba02bc.jpg">
+				</div>
+				<div class="swiper-slide" data-name="CoverMark Lipstick 02">
+					<img src="https://i.pinimg.com/1200x/ff/42/8a/ff428ab847bc83aea15469ba06ba02bc.jpg">
+				</div>
+				<div class="swiper-slide" data-name="CoverMark Powder 03">
+					<img src="https://i.pinimg.com/1200x/ff/42/8a/ff428ab847bc83aea15469ba06ba02bc.jpg">
+				</div>
+				<div class="swiper-slide" data-name="CoverMark Powder 04">
+					<img src="https://i.pinimg.com/1200x/ff/42/8a/ff428ab847bc83aea15469ba06ba02bc.jpg">
+				</div>
+				<div class="swiper-slide" data-name="CoverMark Powder 05">
+					<img src="https://i.pinimg.com/1200x/ff/42/8a/ff428ab847bc83aea15469ba06ba02bc.jpg">
+				</div>
+			</div>
+		</div>
+		<p id="selected-product-name" style="font-weight:bold; color:#b89a5b;">รอเลือกสินค้า...</p>
+	
+		<div class="form-group">
+			<input type="text" id="receiver-name" placeholder="ชื่อผู้รับ (บังคับ)" required>
+			<input type="text" id="sender-name" placeholder="ชื่อผู้ส่ง (บังคับ)" required>
+		</div>
+	
+		<div class="swiper message-swiper" style="height: 80px; background: #eee; border-radius: 10px;">
+			<div class="swiper-wrapper">
+				<div class="swiper-slide">Happy Valentine</div>
+				<div class="swiper-slide">ขอมอบของขวัญสุดพิเศษ</div>
+				<div class="swiper-slide">รักมากๆนะ</div>
+				<div class="swiper-slide">คิดถึงนะ</div>
+			</div>
+		</div>
+	
+		<button onclick="summarizeData()">สรุปข้อมูล</button>
+	</section>
+
+	<section id="section-4">
+		<h3>สรุปข้อมูลของขวัญ</h3>
+		
+		<div id="summary-display"></div>
+		
+		<div class="button-group" style="display: flex; gap: 10px; margin-top: 20px;">
+			<button id="edit-btn" onclick="goToSection(3)" style="background-color: #6c757d; color: white; padding: 15px 25px; border-radius: 50px; font-weight: bold; border: none; cursor: pointer;">
+				แก้ไขข้อมูล
+			</button>
+	
+			<button id="send-liff-btn" onclick="sendGift()" style="background-color: #00b900; color: white; padding: 15px 25px; border-radius: 50px; font-weight: bold; border: none; cursor: pointer;">
+				ส่งให้เพื่อนใน LINE
+			</button>
+		</div>
+	</section>
+
+    <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
