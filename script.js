@@ -244,3 +244,55 @@ async function sendGift() {
 }
 
 
+// เพิ่มในส่วน liff.init() หรือ initializeLiff()
+async function initializeLiff() {
+    try {
+        await liff.init({ liffId: "2008756827-zANFfOMQ" });
+
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('openGift') === 'true') {
+            const giftImg = urlParams.get('img');
+            const giftMsg = urlParams.get('msg');
+            startShakeProcess(giftImg, giftMsg);
+        }
+    } catch (error) {
+        console.error("LIFF Init Error", error);
+    }
+}
+
+
+async function initializeLiff() {
+    try {
+        await liff.init({ liffId: "2008756827-zANFfOMQ" });
+
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('openGift') === 'true') {
+            // ดึงค่าทั้งหมดจาก URL
+            const giftImg = urlParams.get('img');
+            const giftMsg = urlParams.get('msg');
+            const senderName = urlParams.get('from') || "เพื่อนของคุณ"; // รับค่าผู้ส่ง
+            const receiverName = urlParams.get('receiver') || "คุณ";   // รับค่าผู้รับ
+
+            startShakeProcess(giftImg, giftMsg, senderName, receiverName);
+        }
+    } catch (error) {
+        console.error("LIFF Init Error", error);
+    }
+}
+
+function startShakeProcess(img, msg, sender, receiver) {
+    // สลับหน้าจอ
+    document.querySelectorAll('section').forEach(s => s.style.display = 'none');
+    document.getElementById('section-5').style.display = 'block';
+
+    // ใส่ชื่อลงในหน้าเขย่า
+    document.getElementById('display-receiver').innerText = `ถึง คุณ${receiver}`;
+    document.getElementById('display-sender').innerText = sender;
+
+    // เตรียมข้อมูลผลลัพธ์
+    document.getElementById('result-product-img').src = img;
+    document.getElementById('result-message').innerText = msg;
+
+    // เริ่มระบบตรวจจับการเขย่า (โค้ดเดิมที่เคยให้ไว้)
+    initShakeDetection();
+}
