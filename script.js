@@ -266,21 +266,37 @@ async function initializeLiff() {
 }
 
 function startShakeProcess(img, msg, sender, receiver) {
-    // 1. ซ่อนทุกส่วนของหน้าเว็บ (หน้าสร้างของขวัญ)
-    document.querySelectorAll('section').forEach(s => s.style.display = 'none');
-    
-    // 2. แสดง Section 5 (หน้าเขย่า) ทันที
+    console.log("Debug: startShakeProcess Initialized");
+	alert("section 5 coming soon");
+    // 1. ซ่อนทุก Section อื่นๆ ก่อน
+    const sections = document.querySelectorAll('section');
+    sections.forEach(s => s.style.display = 'none');
+
+    // 2. ดึง Section 5 ออกมา
     const section5 = document.getElementById('section-5');
+    if (!section5) {
+        console.error("Error: ไม่พบ id 'section-5' ใน HTML");
+        return;
+    }
+
+    // 3. บังคับแสดงผล และตรวจสอบความสูง
     section5.style.display = 'block';
+    section5.style.minHeight = '100vh';
+    section5.style.visibility = 'visible';
+    section5.style.opacity = '1';
 
-    // 3. แสดงข้อความชื่อผู้รับและผู้ส่งตามที่คุณต้องการ
-    document.getElementById('display-receiver').innerText = `ถึง คุณ${receiver}`;
-    document.getElementById('display-sender-info').innerHTML = `<b>${sender}</b> ได้เลือกของขวัญพิเศษไว้<br>สำหรับคุณโดยเฉพาะ`;
+    // 4. ใส่ข้อมูล (ใส่ Try-Catch เพื่อไม่ให้ Error หนึ่งจุดทำให้หน้าขาวทั้งหมด)
+    try {
+        if(receiver) document.getElementById('display-receiver').innerText = `ถึง คุณ${receiver}`;
+        if(sender) document.getElementById('display-sender-info').innerHTML = `<b>${sender}</b> ได้เลือกของขวัญพิเศษไว้<br>สำหรับคุณโดยเฉพาะ`;
+        if(img) document.getElementById('result-product-img').src = img;
+        if(msg) document.getElementById('final-message').innerText = msg;
+        
+        console.log("Debug: Data injection success");
+    } catch (e) {
+        console.warn("Data injection warning:", e);
+    }
 
-    // 4. เตรียมข้อมูลรูปภาพและข้อความหลังเปิดกล่องไว้รอ
-    document.getElementById('result-product-img').src = img;
-    document.getElementById('final-message').innerText = msg;
-
-    // 5. เริ่มระบบตรวจจับการเขย่า
+    // 5. รันระบบเขย่า
     initShakeDetection();
 }
