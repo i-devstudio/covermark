@@ -230,7 +230,7 @@ async function sendGift() {
 									  "action": {
 										"type": "uri",
 										"label": "เปิดกล่องของขวัญ",
-										"uri": "http://linecorp.com/"
+										"uri": shareUrl
 									  },
 									  "style": "primary",
 									  "height": "sm",
