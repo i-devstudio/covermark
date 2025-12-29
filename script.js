@@ -161,41 +161,90 @@ async function sendGift() {
                     "type": "flex",
                     "altText": `คุณได้รับของขวัญจากคุณ ${sender}`,
                     "contents": {
-                        "type": "bubble",
-                        "hero": {
-                            "type": "image",
-                            "url": window.selectedProductImg,
-                            "size": "full",
-                            "aspectRatio": "20:13",
-                            "aspectMode": "cover"
-                        },
-                        "body": {
-                            "type": "box",
-                            "layout": "vertical",
-                            "contents": [
-                                { "type": "text", "text": "Surprise! 🎁", "weight": "bold", "color": "#b89a5b", "size": "sm" },
-                                { "type": "text", "text": `ถึง: ${receiver}`, "weight": "bold", "size": "xl", "margin": "md" },
-                                { "type": "text", "text": window.selectedMessage, "wrap": true, "color": "#666666", "margin": "md" },
-                                { "type": "separator", "margin": "lg" },
-                                { "type": "text", "text": `จาก: ${sender}`, "size": "xs", "color": "#999999", "margin": "md" }
-                            ]
-                        },
-                        "footer": {
-                            "type": "box",
-                            "layout": "vertical",
-                            "contents": [
-                                {
-                                    "type": "button",
-                                    "action": {
-                                        "type": "uri",
-                                        "label": "เปิดดูของขวัญ",
-                                        "uri": shareUrl
-                                    },
-                                    "style": "primary",
-                                    "color": "#b89a5b"
-                                }
-                            ]
-                        }
+        
+							"type": "bubble",
+							"body": {
+							  "type": "box",
+							  "layout": "vertical",
+							  "contents": [
+								{
+								  "type": "box",
+								  "layout": "vertical",
+								  "contents": [
+									{
+									  "type": "image",
+									  "url": "https://i.pinimg.com/1200x/34/fa/9f/34fa9f65309de40a66da3808161d7310.jpg",
+									  "size": "full",
+									  "aspectRatio": "3:4",
+									  "aspectMode": "cover"
+									},
+									{
+									  "type": "box",
+									  "layout": "vertical",
+									  "contents": [
+										{
+										  "type": "text",
+										  "text": "COVERMARK",
+										  "weight": "bold",
+										  "color": "#ffffff",
+										  "align": "center"
+										}
+									  ],
+									  "height": "40px",
+									  "justifyContent": "center",
+									  "alignItems": "center",
+									  "position": "absolute",
+									  "offsetTop": "10px",
+									  "offsetStart": "50px",
+									  "offsetEnd": "50px"
+									},
+									{
+									  "type": "box",
+									  "layout": "vertical",
+									  "contents": [
+										{
+										  "type": "text",
+										  "text": `To: ${receiver}`,
+										  "weight": "bold",
+										  "color": "#ffffff",
+										  "align": "center"
+										},
+										{
+										  "type": "text",
+										  "text": currentMsg,
+										  "weight": "regular",
+										  "color": "#ffffff",
+										  "align": "center"
+										}
+									  ],
+									  "height": "40px",
+									  "justifyContent": "center",
+									  "alignItems": "center",
+									  "position": "absolute",
+									  "offsetStart": "50px",
+									  "offsetEnd": "50px",
+									  "offsetBottom": "80px"
+									},
+									{
+									  "type": "button",
+									  "action": {
+										"type": "uri",
+										"label": "เปิดกล่องของขวัญ",
+										"uri": "http://linecorp.com/"
+									  },
+									  "style": "primary",
+									  "height": "sm",
+									  "position": "absolute",
+									  "offsetStart": "50px",
+									  "offsetEnd": "50px",
+									  "offsetBottom": "20px"
+									}
+								  ],
+								  "position": "relative"
+								}
+							  ],
+							  "paddingAll": "0px"
+						  }
                     }
                 }
             ]);
