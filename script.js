@@ -245,20 +245,43 @@ async function sendGift() {
 
 
 // เพิ่มในส่วน liff.init() หรือ initializeLiff()
-async function initializeLiff() {
-    try {
-        await liff.init({ liffId: "2008756827-zANFfOMQ" });
 
-        const urlParams = new URLSearchParams(window.location.search);
-        if (urlParams.get('openGift') === 'true') {
-            const giftImg = urlParams.get('img');
-            const giftMsg = urlParams.get('msg');
-            startShakeProcess(giftImg, giftMsg);
+liff.init({ liffId: "2008756827-zANFfOMQ" })
+    .then(() => {
+        if (liff.isLoggedIn()) {
+            // ดึงค่าจาก URL
+            const urlParams = new URLSearchParams(window.location.search);
+            
+            if (urlParams.get('openGift') === 'true') {
+                // ถ้ามี ?openGift=true ให้ดึงข้อมูลมาแสดงหน้า 5 ทันที
+                const img = urlParams.get('img');
+                const msg = urlParams.get('msg');
+                const sender = urlParams.get('from') || "เพื่อนของคุณ";
+                const receiver = urlParams.get('receiver') || "คุณ";
+                
+                // เรียกฟังก์ชันเปลี่ยนหน้า
+                startShakeProcess(img, msg, sender, receiver);
+            }
         }
-    } catch (error) {
-        console.error("LIFF Init Error", error);
-    }
-}
+    })
+    .catch((err) => {
+        console.error("LIFF Initialization failed", err);
+    });
+
+// async function initializeLiff() {
+//     try {
+//         await liff.init({ liffId: "2008756827-zANFfOMQ" });
+
+//         const urlParams = new URLSearchParams(window.location.search);
+//         if (urlParams.get('openGift') === 'true') {
+//             const giftImg = urlParams.get('img');
+//             const giftMsg = urlParams.get('msg');
+//             startShakeProcess(giftImg, giftMsg);
+//         }
+//     } catch (error) {
+//         console.error("LIFF Init Error", error);
+//     }
+// }
 
 
 async function initializeLiff() {
@@ -279,20 +302,37 @@ async function initializeLiff() {
         console.error("LIFF Init Error", error);
     }
 }
-
 function startShakeProcess(img, msg, sender, receiver) {
-    // สลับหน้าจอ
-    document.querySelectorAll('section').forEach(s => s.style.display = 'none');
-    document.getElementById('section-5').style.display = 'block';
-
-    // ใส่ชื่อลงในหน้าเขย่า
+    // ซ่อนทุกหน้า
+    document.querySelectorAll('section').forEach(sec => sec.style.display = 'none');
+    
+    // แสดงเฉพาะหน้า 5
+    const section5 = document.getElementById('section-5');
+    section5.style.display = 'block';
+    
+    // ใส่ข้อมูลที่ได้รับมา
     document.getElementById('display-receiver').innerText = `ถึง คุณ${receiver}`;
     document.getElementById('display-sender').innerText = sender;
-
-    // เตรียมข้อมูลผลลัพธ์
+    document.getElementById('final-message').innerText = msg;
     document.getElementById('result-product-img').src = img;
-    document.getElementById('result-message').innerText = msg;
-
-    // เริ่มระบบตรวจจับการเขย่า (โค้ดเดิมที่เคยให้ไว้)
+    
+    // เริ่มระบบเขย่า
     initShakeDetection();
 }
+
+// function startShakeProcess(img, msg, sender, receiver) {
+//     // สลับหน้าจอ
+//     document.querySelectorAll('section').forEach(s => s.style.display = 'none');
+//     document.getElementById('section-5').style.display = 'block';
+
+//     // ใส่ชื่อลงในหน้าเขย่า
+//     document.getElementById('display-receiver').innerText = `ถึง คุณ${receiver}`;
+//     document.getElementById('display-sender').innerText = sender;
+
+//     // เตรียมข้อมูลผลลัพธ์
+//     document.getElementById('result-product-img').src = img;
+//     document.getElementById('result-message').innerText = msg;
+
+//     // เริ่มระบบตรวจจับการเขย่า (โค้ดเดิมที่เคยให้ไว้)
+//     initShakeDetection();
+// }
