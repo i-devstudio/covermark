@@ -1,5 +1,8 @@
 * { box-sizing: border-box; }
-body { margin: 0; font-family: sans-serif; overflow-x: hidden; }
+body { 
+	margin: 0; font-family: sans-serif; overflow-x: hidden; 
+	background-color: #1a1a1a;
+}
 
 section {
     display: none;
@@ -64,6 +67,12 @@ button {
     font-size: 1.2rem;
     color: #555;
     font-weight: bold;
+}
+
+#section-1 .content{
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
 }
 
 /* การจัดการ Section */
@@ -145,4 +154,15 @@ section.active {
 
 @keyframes zoomOutUp {
     to { transform: scale(0); opacity: 0; }
+}
+
+#section-5 {
+    position: fixed !important;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 999999 !important; /* เลขสูงที่สุดเพื่อให้ทับทุกอย่าง */
+    background-color: #1a1a1a !important;
+    display: none; /* คุมด้วย JS */
 }
