@@ -1,40 +1,63 @@
 let productSwiper, messageSwiper;
 
 // --- LINE LIFF INITIALIZATION ---
+// async function initializeLiff() {
+//     try {
+//         // เริ่มต้นการใช้งาน LIFF ด้วย ID ของคุณ
+//         await liff.init({ liffId: "2008756827-zANFfOMQ" });
+
+//         if (liff.isLoggedIn()) {
+//             console.log("LIFF Logged In");
+//             // หากล็อกอินแล้ว สามารถดึงชื่อผู้ใช้มาใส่ในช่อง 'ผู้ส่ง' อัตโนมัติได้ (Optional)
+//             liff.getProfile().then(profile => {
+//                 const senderInput = document.getElementById('sender-name');
+//                 if (senderInput && !senderInput.value) {
+//                     senderInput.value = profile.displayName;
+//                 }
+//             });
+//         } else {
+//             console.log("LIFF Not Logged In - Waiting for user action");
+//             // คุณสามารถเลือกให้ liff.login() ทันทีที่เข้าเว็บเลยก็ได้ โดยนำคอมเมนต์ออก:
+//             // liff.login();
+//         }
+
+//         // ระบบจัดการการเปิดของขวัญ (เมื่อเพื่อนกด Link มา)
+//         const urlParams = new URLSearchParams(window.location.search);
+//         if (urlParams.get('openGift') === 'true') {
+//             const giftImg = urlParams.get('img');
+//             const giftMsg = urlParams.get('msg');
+            
+//             // เรียกฟังก์ชันแสดงหน้าเปิดของขวัญ (ต้องมีฟังก์ชัน showShakePage รองรับ)
+//             if (typeof startShakeProcess === "function") {
+//                 startShakeProcess(giftImg, giftMsg);
+//             }
+//         }
+
+//     } catch (error) {
+//         console.error("LIFF Initialization failed", error);
+//     }
+// }
+
 async function initializeLiff() {
     try {
-        // เริ่มต้นการใช้งาน LIFF ด้วย ID ของคุณ
         await liff.init({ liffId: "2008756827-zANFfOMQ" });
-
-        if (liff.isLoggedIn()) {
-            console.log("LIFF Logged In");
-            // หากล็อกอินแล้ว สามารถดึงชื่อผู้ใช้มาใส่ในช่อง 'ผู้ส่ง' อัตโนมัติได้ (Optional)
-            liff.getProfile().then(profile => {
-                const senderInput = document.getElementById('sender-name');
-                if (senderInput && !senderInput.value) {
-                    senderInput.value = profile.displayName;
-                }
-            });
-        } else {
-            console.log("LIFF Not Logged In - Waiting for user action");
-            // คุณสามารถเลือกให้ liff.login() ทันทีที่เข้าเว็บเลยก็ได้ โดยนำคอมเมนต์ออก:
-            // liff.login();
-        }
-
-        // ระบบจัดการการเปิดของขวัญ (เมื่อเพื่อนกด Link มา)
         const urlParams = new URLSearchParams(window.location.search);
-        if (urlParams.get('openGift') === 'true') {
-            const giftImg = urlParams.get('img');
-            const giftMsg = urlParams.get('msg');
-            
-            // เรียกฟังก์ชันแสดงหน้าเปิดของขวัญ (ต้องมีฟังก์ชัน showShakePage รองรับ)
-            if (typeof startShakeProcess === "function") {
-                startShakeProcess(giftImg, giftMsg);
-            }
-        }
 
+        if (urlParams.get('openGift') === 'true') {
+            // กรณีเป็นผู้รับ: สั่งเริ่มกระบวนการเขย่า
+            const img = urlParams.get('img');
+            const msg = urlParams.get('msg');
+            const sender = urlParams.get('from') || "เพื่อนของคุณ";
+            const receiver = urlParams.get('receiver') || "คุณ";
+            
+            startShakeProcess(img, msg, sender, receiver);
+        } else {
+            // กรณีเป็นผู้ส่ง: แสดงหน้าแรกตามปกติ
+            const sec1 = document.getElementById('section-1');
+            if(sec1) sec1.style.display = 'block';
+        }
     } catch (error) {
-        console.error("LIFF Initialization failed", error);
+        console.error("LIFF Init Error", error);
     }
 }
 
@@ -245,34 +268,35 @@ async function sendGift() {
 }
 
 function startShakeProcess(img, msg, sender, receiver) {
+    console.log("Start Shake Process Triggered");
 
-	document.querySelectorAll('section').forEach(s => s.style.display = 'none');
-    // 1. เปิดหน้า Section 5
-    const sec5 = document.getElementById('section-5');
-    sec5.style.display = 'block';
+    // 1. ซ่อนทุกอย่างทันทีแบบ Force
+    const allSections = document.querySelectorAll('section');
+    allSections.forEach(s => {
+        s.style.setProperty("display", "none", "important");
+    });
 
-    // 2. ใส่ข้อมูลพื้นฐาน (ป้องกัน Error ด้วยการเช็ค Element ก่อน)
-    if(document.getElementById('view-receiver')) document.getElementById('view-receiver').innerText = `ถึง คุณ${receiver}`;
-    if(document.getElementById('view-sender')) document.getElementById('view-sender').innerText = sender;
-    if(document.getElementById('final-receiver')) document.getElementById('final-receiver').innerText = `คุณ${receiver}`;
-    if(document.getElementById('final-message')) document.getElementById('final-message').innerText = `"${msg}"`;
-    if(document.getElementById('result-product-img')) document.getElementById('result-product-img').src = img;
+    // 2. ใช้ setTimeout เพื่อป้องกันอาการหน้าขาว (Race Condition)
+    setTimeout(() => {
+        const sec5 = document.getElementById('section-5');
+        if (sec5) {
+            // แสดง Section 5 แบบ Force
+            sec5.style.setProperty("display", "block", "important");
+            
+            // ใส่ข้อมูลลงใน Element
+            if(document.getElementById('view-receiver')) document.getElementById('view-receiver').innerText = `ถึง คุณ${receiver}`;
+            if(document.getElementById('view-sender')) document.getElementById('view-sender').innerText = sender;
+            if(document.getElementById('final-receiver')) document.getElementById('final-receiver').innerText = `คุณ${receiver}`;
+            if(document.getElementById('final-message')) document.getElementById('final-message').innerText = `"${msg}"`;
+            if(document.getElementById('result-product-img')) document.getElementById('result-product-img').src = img;
+
+            console.log("Section 5 is now visible");
+        }
+    }, 100); // รอ 0.1 วินาทีเพื่อให้ DOM พร้อม
 
     // 3. เริ่มตรวจจับเขย่า
-    initShakeDetection();
-}
-
-function revealGift() {
-    // เล่นเสียง Jazz (ถ้ามีไฟล์)
-    // var audio = new Audio('path_to_jazz_sound.mp3'); audio.play();
-
-    // สลับหน้าจอภายใน Section 5
-    document.getElementById('shake-view').style.display = 'none';
-    document.getElementById('gift-result-view').style.display = 'block';
-    
-    // พลุ
-    if (typeof confetti === 'function') {
-        confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
+    if (typeof initShakeDetection === "function") {
+        initShakeDetection();
     }
 }
 
