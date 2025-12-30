@@ -1,42 +1,21 @@
+// ==========================================
+// 1. GLOBAL VARIABLES & STATE
+// ==========================================
 let productSwiper, messageSwiper;
 
-// --- LINE LIFF INITIALIZATION ---
-// async function initializeLiff() {
-//     try {
-//         // เริ่มต้นการใช้งาน LIFF ด้วย ID ของคุณ
-//         await liff.init({ liffId: "2008756827-zANFfOMQ" });
+// ==========================================
+// 2. INITIALIZATION (ระบบเริ่มต้น)
+// ==========================================
 
-//         if (liff.isLoggedIn()) {
-//             console.log("LIFF Logged In");
-//             // หากล็อกอินแล้ว สามารถดึงชื่อผู้ใช้มาใส่ในช่อง 'ผู้ส่ง' อัตโนมัติได้ (Optional)
-//             liff.getProfile().then(profile => {
-//                 const senderInput = document.getElementById('sender-name');
-//                 if (senderInput && !senderInput.value) {
-//                     senderInput.value = profile.displayName;
-//                 }
-//             });
-//         } else {
-//             console.log("LIFF Not Logged In - Waiting for user action");
-//             // คุณสามารถเลือกให้ liff.login() ทันทีที่เข้าเว็บเลยก็ได้ โดยนำคอมเมนต์ออก:
-//             // liff.login();
-//         }
+// เรียกใช้งานเมื่อโหลดหน้าเว็บเสร็จสมบูรณ์
+window.onload = function() {
+    initializeLiff();
+};
 
-//         // ระบบจัดการการเปิดของขวัญ (เมื่อเพื่อนกด Link มา)
-//         const urlParams = new URLSearchParams(window.location.search);
-//         if (urlParams.get('openGift') === 'true') {
-//             const giftImg = urlParams.get('img');
-//             const giftMsg = urlParams.get('msg');
-            
-//             // เรียกฟังก์ชันแสดงหน้าเปิดของขวัญ (ต้องมีฟังก์ชัน showShakePage รองรับ)
-//             if (typeof startShakeProcess === "function") {
-//                 startShakeProcess(giftImg, giftMsg);
-//             }
-//         }
-
-//     } catch (error) {
-//         console.error("LIFF Initialization failed", error);
-//     }
-// }
+// ตั้งค่า Swiper หลังจากโครงสร้าง DOM พร้อม
+document.addEventListener('DOMContentLoaded', () => {
+    initSwipers();
+});
 
 async function initializeLiff() {
     try {
@@ -44,7 +23,7 @@ async function initializeLiff() {
         const urlParams = new URLSearchParams(window.location.search);
 
         if (urlParams.get('openGift') === 'true') {
-            // กรณีเป็นผู้รับ: สั่งเริ่มกระบวนการเขย่า
+            // [กรณีผู้รับ] เริ่มกระบวนการเปิดของขวัญ
             const img = urlParams.get('img');
             const msg = urlParams.get('msg');
             const sender = urlParams.get('from') || "เพื่อนของคุณ";
@@ -52,28 +31,27 @@ async function initializeLiff() {
             
             startShakeProcess(img, msg, sender, receiver);
         } else {
-            // กรณีเป็นผู้ส่ง: แสดงหน้าแรกตามปกติ
+            // [กรณีผู้ส่ง] แสดงหน้าแรกเพื่อเริ่มสร้างของขวัญ
             const sec1 = document.getElementById('section-1');
             if(sec1) sec1.style.display = 'block';
+            
+            // ดึงชื่อโปรไฟล์ LINE มาใส่ในช่องผู้ส่ง (ถ้า Logged In)
+            if (liff.isLoggedIn()) {
+                liff.getProfile().then(profile => {
+                    const senderInput = document.getElementById('sender-name');
+                    if (senderInput && !senderInput.value) {
+                        senderInput.value = profile.displayName;
+                    }
+                });
+            }
         }
     } catch (error) {
         console.error("LIFF Init Error", error);
     }
 }
 
-// เรียกใช้งานทันทีเมื่อโหลดหน้าเว็บ
-// initializeLiff();
-
-// --------------------------------
-
-
-// ตั้งค่า Swiper ตั้งแต่โหลดหน้าเว็บเสร็จ
-document.addEventListener('DOMContentLoaded', () => {
-    initSwipers();
-});
-
 function initSwipers() {
-    // 1. Swiper สินค้า
+    // Swiper สินค้า
     productSwiper = new Swiper('.product-swiper', {
         loop: true,
         centeredSlides: true,
@@ -84,7 +62,6 @@ function initSwipers() {
         observeParents: true,
         on: {
             slideChange: function () {
-                // ดึง Slide ที่ Active จริงๆ (รองรับ Loop)
                 const activeSlide = this.slides[this.activeIndex];
                 const name = activeSlide.getAttribute('data-name');
                 const img = activeSlide.querySelector('img').src;
@@ -96,7 +73,7 @@ function initSwipers() {
         }
     });
 
-    // 2. Swiper ข้อความ
+    // Swiper ข้อความ
     messageSwiper = new Swiper('.message-swiper', {
         loop: true,
         centeredSlides: true,
@@ -113,34 +90,32 @@ function initSwipers() {
     });
 }
 
-// เพิ่มฟังก์ชันนี้ลงไป (หรือตรวจสอบว่า goToSection เดิมรองรับการเรียกใช้ซ้ำได้)
+// ==========================================
+// 3. SENDER WORKFLOW (ฟังก์ชันสำหรับผู้ส่ง)
+// ==========================================
 
 function goToSection(num) {
-    // ซ่อนทุก Section
     document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
     
-    // แสดง Section ที่ต้องการ
     const targetSection = document.getElementById(`section-${num}`);
     if (targetSection) {
         targetSection.classList.add('active');
     }
     
-    // บังคับให้ Swiper คำนวณตำแหน่งใหม่ทุกครั้งที่กลับมาหน้า 3
+    // บังคับ Update Swiper เมื่อกลับมาที่หน้าเลือกของขวัญ (Section 3)
     if (num === 3) {
         setTimeout(() => {
             if (productSwiper) productSwiper.update();
             if (messageSwiper) messageSwiper.update();
             
-            // เล่นเพลงต่อ (ถ้าเพลงหยุด)
             const music = document.getElementById('bg-music');
             if (music && music.paused) {
                 music.play().catch(e => console.log("Music play blocked"));
             }
-        }, 150); // เพิ่มเวลาเล็กน้อยเพื่อให้หน้าจอ Render เสร็จก่อน Update
+        }, 150);
     }
 }
 
-// ฟังก์ชันสรุปข้อมูล
 function summarizeData() {
     const receiver = document.getElementById('receiver-name').value;
     const sender = document.getElementById('sender-name').value;
@@ -164,20 +139,17 @@ function summarizeData() {
 }
 
 async function sendGift() {
-    // 1. ตรวจสอบว่าเปิดผ่าน LIFF หรือไม่
     if (!liff.isLoggedIn()) {
         liff.login();
         return;
     }
 
-    // 2. ดึงค่าที่ User เลือกไว้
     const receiver = document.getElementById('receiver-name').value;
     const sender = document.getElementById('sender-name').value;
     
-    // สร้าง Link สำหรับผู้รับ (ใส่ข้อมูลไปกับ URL เพื่อให้หน้าเปิดของขวัญแสดงผลถูก)
-    const shareUrl = `https://liff.line.me/2008756827-zANFfOMQ?openGift=true&img=${encodeURIComponent(window.selectedProductImg)}&msg=${encodeURIComponent(window.selectedMessage)}`;
+    // ประกอบ URL พร้อมพารามิเตอร์ข้อมูล
+    const shareUrl = `https://liff.line.me/2008756827-zANFfOMQ?openGift=true&img=${encodeURIComponent(window.selectedProductImg)}&msg=${encodeURIComponent(window.selectedMessage)}&from=${encodeURIComponent(sender)}&receiver=${encodeURIComponent(receiver)}`;
 
-    // 3. ตรวจสอบ Permission การแชร์
     if (liff.isApiAvailable('shareTargetPicker')) {
         try {
             const result = await liff.shareTargetPicker([
@@ -185,78 +157,54 @@ async function sendGift() {
                     "type": "flex",
                     "altText": `คุณได้รับของขวัญจากคุณ ${sender}`,
                     "contents": {
-							"type": "bubble",
-							"body": {
-							  "type": "box",
-							  "layout": "vertical",
-							  "contents": [
-								{
-								  "type": "box",
-								  "layout": "vertical",
-								  "contents": [
-									{
-									  "type": "image",
-									  "url": "https://img5.pic.in.th/file/secure-sv1/COVERMARK.jpg",
-									  "size": "full",
-									  "aspectRatio": "3:4",
-									  "aspectMode": "cover"
-									},
-									{
-									  "type": "box",
-									  "layout": "vertical",
-									  "contents": [
-										{
-										  "type": "text",
-										  "text": `To: ${receiver}`,
-										  "weight": "bold",
-										  "color": "#ffffff",
-										  "align": "center"
-										},
-										{
-										  "type": "text",
-										  "text": window.selectedMessage,
-										  "weight": "regular",
-										  "color": "#ffffff",
-										  "align": "center"
-										}
-									  ],
-									  "height": "40px",
-									  "justifyContent": "center",
-									  "alignItems": "center",
-									  "position": "absolute",
-									  "offsetStart": "50px",
-									  "offsetEnd": "50px",
-									  "offsetBottom": "80px"
-									},
-									{
-									  "type": "button",
-									  "action": {
-										"type": "uri",
-										"label": "เปิดกล่องของขวัญ",
-										"uri": shareUrl
-									  },
-									  "style": "primary",
-									  "height": "sm",
-									  "position": "absolute",
-									  "offsetStart": "50px",
-									  "offsetEnd": "50px",
-									  "offsetBottom": "20px"
-									}
-								  ],
-								  "position": "relative"
-								}
-							  ],
-							  "paddingAll": "0px"
-						  }
+                        "type": "bubble",
+                        "body": {
+                            "type": "box",
+                            "layout": "vertical",
+                            "contents": [
+                                {
+                                    "type": "box",
+                                    "layout": "vertical",
+                                    "contents": [
+                                        {
+                                            "type": "image",
+                                            "url": "https://img5.pic.in.th/file/secure-sv1/COVERMARK.jpg",
+                                            "size": "full",
+                                            "aspectRatio": "3:4",
+                                            "aspectMode": "cover"
+                                        },
+                                        {
+                                            "type": "box",
+                                            "layout": "vertical",
+                                            "contents": [
+                                                { "type": "text", "text": `To: ${receiver}`, "weight": "bold", "color": "#ffffff", "align": "center" },
+                                                { "type": "text", "text": window.selectedMessage, "weight": "regular", "color": "#ffffff", "align": "center" }
+                                            ],
+                                            "height": "40px",
+                                            "justifyContent": "center",
+                                            "alignItems": "center",
+                                            "position": "absolute",
+                                            "offsetStart": "50px", "offsetEnd": "50px", "offsetBottom": "80px"
+                                        },
+                                        {
+                                            "type": "button",
+                                            "action": { "type": "uri", "label": "เปิดกล่องของขวัญ", "uri": shareUrl },
+                                            "style": "primary", "height": "sm", "position": "absolute",
+                                            "offsetStart": "50px", "offsetEnd": "50px", "offsetBottom": "20px"
+                                        }
+                                    ],
+                                    "position": "relative"
+                                }
+                            ],
+                            "paddingAll": "0px"
+                        }
                     }
                 }
             ]);
 
             if (result) {
                 alert("ส่งของขวัญเรียบร้อยแล้ว!");
-                liff.closeWindow(); // ปิดหน้าต่าง LIFF ทันทีหลังส่งเสร็จ
-            } else {
-                console.log("User cancelled the picker");
+                liff.closeWindow();
             }
         } catch (error) {
             console.error("Error sending message:", error);
@@ -267,39 +215,46 @@ async function sendGift() {
     }
 }
 
+// ==========================================
+// 4. RECEIVER WORKFLOW (ฟังก์ชันสำหรับผู้รับ)
+// ==========================================
+
 function startShakeProcess(img, msg, sender, receiver) {
     console.log("Start Shake Process Triggered");
 
-    // 1. ซ่อนทุกอย่างทันทีแบบ Force
-    const allSections = document.querySelectorAll('section');
-    allSections.forEach(s => {
+    // 1. ซ่อนทุก Section ทันที
+    document.querySelectorAll('section').forEach(s => {
         s.style.setProperty("display", "none", "important");
     });
 
-    // 2. ใช้ setTimeout เพื่อป้องกันอาการหน้าขาว (Race Condition)
+    // 2. แสดงหน้าเปิดของขวัญ (Section 5)
     setTimeout(() => {
         const sec5 = document.getElementById('section-5');
         if (sec5) {
-            // แสดง Section 5 แบบ Force
             sec5.style.setProperty("display", "block", "important");
             
-            // ใส่ข้อมูลลงใน Element
+            // แสดงข้อมูลในหน้าจอ
             if(document.getElementById('view-receiver')) document.getElementById('view-receiver').innerText = `ถึง คุณ${receiver}`;
             if(document.getElementById('view-sender')) document.getElementById('view-sender').innerText = sender;
             if(document.getElementById('final-receiver')) document.getElementById('final-receiver').innerText = `คุณ${receiver}`;
             if(document.getElementById('final-message')) document.getElementById('final-message').innerText = `"${msg}"`;
             if(document.getElementById('result-product-img')) document.getElementById('result-product-img').src = img;
-
-            console.log("Section 5 is now visible");
         }
-    }, 100); // รอ 0.1 วินาทีเพื่อให้ DOM พร้อม
+    }, 100);
 
-    // 3. เริ่มตรวจจับเขย่า
+    // 3. เริ่มระบบตรวจจับการเขย่า
     if (typeof initShakeDetection === "function") {
         initShakeDetection();
     }
 }
 
-window.onload = function() {
-    initializeLiff();
-};
+function revealGift() {
+    // สลับหน้าจอภายใน Section 5 จากหน้าเขย่าเป็นหน้าผลลัพธ์
+    document.getElementById('shake-view').style.display = 'none';
+    document.getElementById('gift-result-view').style.display = 'block';
+    
+    // เอฟเฟกต์พลุเฉลิมฉลอง
+    if (typeof confetti === 'function') {
+        confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
+    }
+}
