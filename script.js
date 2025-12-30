@@ -7,7 +7,7 @@ let productSwiper, messageSwiper;
 // 2. INITIALIZATION (ระบบเริ่มต้น)
 // ==========================================
 
-// เรียกใช้งานเมื่อโหลดหน้าเว็บเสร็จสมบูรณ์
+// เรียกใช้งานเมื่อโหลดหน้าเว็บเสร็จสมบูรณ์ (เหลือจุดเดียว)
 window.onload = function() {
     initializeLiff();
 };
@@ -18,40 +18,71 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 async function initializeLiff() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const isOpenGift = urlParams.get('openGift') === 'true';
+
+    // 1. ถ้าเป็นผู้รับ (เปิดของขวัญ) ให้ซ่อนหน้าเริ่มต้นทันทีตั้งแต่วินาทีแรกเพื่อกันหน้าขาว/หน้าแรกโผล่
+    if (isOpenGift) {
+        document.querySelectorAll('section').forEach(s => s.style.display = 'none');
+    }
+
     try {
         await liff.init({ liffId: "2008756827-zANFfOMQ" });
-        const urlParams = new URLSearchParams(window.location.search);
-
-        if (urlParams.get('openGift') === 'true') {
-            // [กรณีผู้รับ] เริ่มกระบวนการเปิดของขวัญ
-            const img = urlParams.get('img');
-            const msg = urlParams.get('msg');
-            const sender = urlParams.get('from') || "เพื่อนของคุณ";
-            const receiver = urlParams.get('receiver') || "คุณ";
-            
-            startShakeProcess(img, msg, sender, receiver);
-        } else {
-            // [กรณีผู้ส่ง] แสดงหน้าแรกเพื่อเริ่มสร้างของขวัญ
-            const sec1 = document.getElementById('section-1');
-            if(sec1) sec1.style.display = 'block';
-            
-            // ดึงชื่อโปรไฟล์ LINE มาใส่ในช่องผู้ส่ง (ถ้า Logged In)
-            if (liff.isLoggedIn()) {
-                liff.getProfile().then(profile => {
-                    const senderInput = document.getElementById('sender-name');
-                    if (senderInput && !senderInput.value) {
-                        senderInput.value = profile.displayName;
-                    }
-                });
-            }
-        }
     } catch (error) {
-        console.error("LIFF Init Error", error);
+        console.error("LIFF Init Error: Failed to fetch แต่จะทำงานต่อ", error);
+    }
+
+    // 2. จัดการการแยกเส้นทางการแสดงผล (ผู้ส่ง vs ผู้รับ)
+    if (isOpenGift) {
+        const img = urlParams.get('img');
+        const msg = urlParams.get('msg');
+        const sender = urlParams.get('from') || "เพื่อนของคุณ";
+        const receiver = urlParams.get('receiver') || "คุณ";
+        
+        startShakeProcess(img, msg, sender, receiver);
+    } else {
+        const sec1 = document.getElementById('section-1');
+        if(sec1) sec1.style.display = 'block';
     }
 }
 
+// ==========================================
+// 3. RECEIVER WORKFLOW (ฟังก์ชันสำหรับผู้รับ - หน้า 5)
+// ==========================================
+
+function startShakeProcess(img, msg, sender, receiver) {
+    document.querySelectorAll('section').forEach(s => s.style.display = 'none');
+    const sec5 = document.getElementById('section-5');
+    
+    if (sec5) {
+        sec5.style.setProperty("display", "block", "important");
+        
+        document.getElementById('view-receiver').innerText = `ถึง คุณ${receiver}`;
+        document.getElementById('view-sender').innerText = sender;
+        document.getElementById('final-receiver').innerText = `คุณ${receiver}`;
+        document.getElementById('final-message').innerText = `"${msg}"`;
+        document.getElementById('result-product-img').src = img;
+        
+        if (typeof initShakeDetection === "function") {
+            initShakeDetection();
+        }
+    }
+}
+
+function revealGift() {
+    document.getElementById('shake-view').style.display = 'none';
+    document.getElementById('gift-result-view').style.display = 'block';
+    
+    if (typeof confetti === 'function') {
+        confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
+    }
+}
+
+// ==========================================
+// 4. SWIPER CONFIGURATION
+// ==========================================
+
 function initSwipers() {
-    // Swiper สินค้า
     productSwiper = new Swiper('.product-swiper', {
         loop: true,
         centeredSlides: true,
@@ -73,7 +104,6 @@ function initSwipers() {
         }
     });
 
-    // Swiper ข้อความ
     messageSwiper = new Swiper('.message-swiper', {
         loop: true,
         centeredSlides: true,
@@ -91,7 +121,7 @@ function initSwipers() {
 }
 
 // ==========================================
-// 3. SENDER WORKFLOW (ฟังก์ชันสำหรับผู้ส่ง)
+// 5. SENDER WORKFLOW (ฟังก์ชันสำหรับผู้ส่ง - หน้า 1-4)
 // ==========================================
 
 function goToSection(num) {
@@ -102,7 +132,6 @@ function goToSection(num) {
         targetSection.classList.add('active');
     }
     
-    // บังคับ Update Swiper เมื่อกลับมาที่หน้าเลือกของขวัญ (Section 3)
     if (num === 3) {
         setTimeout(() => {
             if (productSwiper) productSwiper.update();
@@ -147,7 +176,6 @@ async function sendGift() {
     const receiver = document.getElementById('receiver-name').value;
     const sender = document.getElementById('sender-name').value;
     
-    // ประกอบ URL พร้อมพารามิเตอร์ข้อมูล
     const shareUrl = `https://liff.line.me/2008756827-zANFfOMQ?openGift=true&img=${encodeURIComponent(window.selectedProductImg)}&msg=${encodeURIComponent(window.selectedMessage)}&from=${encodeURIComponent(sender)}&receiver=${encodeURIComponent(receiver)}`;
 
     if (liff.isApiAvailable('shareTargetPicker')) {
@@ -212,49 +240,5 @@ async function sendGift() {
         }
     } else {
         alert("ฟีเจอร์นี้ไม่รองรับบนเบราว์เซอร์ภายนอก กรุณาเปิดใน LINE");
-    }
-}
-
-// ==========================================
-// 4. RECEIVER WORKFLOW (ฟังก์ชันสำหรับผู้รับ)
-// ==========================================
-
-function startShakeProcess(img, msg, sender, receiver) {
-    console.log("Start Shake Process Triggered");
-
-    // 1. ซ่อนทุก Section ทันที
-    document.querySelectorAll('section').forEach(s => {
-        s.style.setProperty("display", "none", "important");
-    });
-
-    // 2. แสดงหน้าเปิดของขวัญ (Section 5)
-    setTimeout(() => {
-        const sec5 = document.getElementById('section-5');
-        if (sec5) {
-            sec5.style.setProperty("display", "block", "important");
-            
-            // แสดงข้อมูลในหน้าจอ
-            if(document.getElementById('view-receiver')) document.getElementById('view-receiver').innerText = `ถึง คุณ${receiver}`;
-            if(document.getElementById('view-sender')) document.getElementById('view-sender').innerText = sender;
-            if(document.getElementById('final-receiver')) document.getElementById('final-receiver').innerText = `คุณ${receiver}`;
-            if(document.getElementById('final-message')) document.getElementById('final-message').innerText = `"${msg}"`;
-            if(document.getElementById('result-product-img')) document.getElementById('result-product-img').src = img;
-        }
-    }, 100);
-
-    // 3. เริ่มระบบตรวจจับการเขย่า
-    if (typeof initShakeDetection === "function") {
-        initShakeDetection();
-    }
-}
-
-function revealGift() {
-    // สลับหน้าจอภายใน Section 5 จากหน้าเขย่าเป็นหน้าผลลัพธ์
-    document.getElementById('shake-view').style.display = 'none';
-    document.getElementById('gift-result-view').style.display = 'block';
-    
-    // เอฟเฟกต์พลุเฉลิมฉลอง
-    if (typeof confetti === 'function') {
-        confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
     }
 }
